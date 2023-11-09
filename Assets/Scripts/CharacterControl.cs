@@ -5,24 +5,69 @@ using UnityEngine;
 public class CharacterControl : MonoBehaviour
 {
     private Rigidbody2D personaje;
-    public float velocidad;
     private bool mirandoDrecha;
     private Animator animator;
+
+    public float velocidad;
+    public float fuerzaSalto;
+    public int saltosMaximos;
+    public int saltosRestantes;
+
+   
+    private BoxCollider2D boxCollider;
+    public LayerMask capaSuelo;
 
     // Start is called before the first frame update
     void Start()
     {
         personaje = GetComponent<Rigidbody2D>();
         velocidad = 5;
+        fuerzaSalto = 10;
         mirandoDrecha = true;
         animator = GetComponent<Animator>();
+
+
+        boxCollider = GetComponent<BoxCollider2D>();
+        capaSuelo = LayerMask.GetMask("Suelo");
+
+        saltosMaximos = 2;
+
+        saltosRestantes = saltosMaximos;
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
         ProcesarMovimiento();
+        procesarSalto();
     }
+
+    //Evitar doble salto con arrayCast
+    bool estaEnSuelo() 
+    {
+       Vector2 cajaComprobacion = new Vector2(boxCollider.bounds.size.x, boxCollider.bounds.size.y);
+
+       RaycastHit2D rycastHit = Physics2D.BoxCast(boxCollider.bounds.center, cajaComprobacion, 0f, Vector2.down, 0.2f, capaSuelo);
+        return rycastHit.collider != null;
+    }
+
+    void procesarSalto() {
+
+        if (estaEnSuelo()) 
+        {
+            saltosRestantes = saltosMaximos; 
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && saltosRestantes > 0)
+        {
+            saltosRestantes--;
+            personaje.velocity = new Vector2(personaje.velocity.x, 0f);
+            personaje.AddForce(Vector2.up * fuerzaSalto, ForceMode2D.Impulse);
+        }
+    }
+
 
     void ProcesarMovimiento() 
     {
@@ -38,14 +83,8 @@ public class CharacterControl : MonoBehaviour
         {
             animator.SetBool("isWalking", false);
         }
-
-
         personaje.velocity = new Vector2(inputMovimiento * velocidad, personaje.velocity.y);
-
         GestionarOrientacion(inputMovimiento);
-
-
-
     }
 
     void GestionarOrientacion(float inputMovimiento)
