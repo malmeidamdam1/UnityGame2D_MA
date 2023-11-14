@@ -30,7 +30,7 @@ public class CharacterControl : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
         capaSuelo = LayerMask.GetMask("Suelo");
 
-        saltosMaximos = 2;
+        saltosMaximos = 1;
 
         saltosRestantes = saltosMaximos;
 
