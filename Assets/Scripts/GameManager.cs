@@ -4,21 +4,21 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
+{ 
+    //Propiedad acceder al valor desde fuera de la clase (en HUD)
+    public int PuntosTotales { get { return puntosTotales; } }
+
+    private int puntosTotales;
+
+    public void SumarPuntos(int puntosSumar)
     {
-        
+        puntosTotales += puntosSumar;
+        Debug.Log(puntosTotales);
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-   // public void changeScene() {
-     //   SceneManager.LoadScene(escenaNueva);
+    // public void changeScene() {
+    //   SceneManager.LoadScene(escenaNueva);
     //}
 
 }
