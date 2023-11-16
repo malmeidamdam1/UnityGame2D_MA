@@ -17,7 +17,6 @@ public class HUD : MonoBehaviour
     void Update()
     {
         puntos.text = gameManager.PuntosTotales.ToString();
-        Debug.Log(gameManager.PuntosTotales.ToString());
     }
 
 
