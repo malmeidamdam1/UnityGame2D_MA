@@ -13,9 +13,9 @@ public class CharacterControl : MonoBehaviour
     public int saltosMaximos;
     public int saltosRestantes;
 
-   
     private BoxCollider2D boxCollider;
     public LayerMask capaSuelo;
+    public AudioClip sonidoSalto; //Asignamos en editor a su prefab
 
     // Start is called before the first frame update
     void Start()
@@ -26,15 +26,11 @@ public class CharacterControl : MonoBehaviour
         mirandoDrecha = true;
         animator = GetComponent<Animator>();
 
-
         boxCollider = GetComponent<BoxCollider2D>();
         capaSuelo = LayerMask.GetMask("Suelo");
 
         saltosMaximos = 1;
-
         saltosRestantes = saltosMaximos;
-
-
     }
 
     // Update is called once per frame
@@ -60,11 +56,12 @@ public class CharacterControl : MonoBehaviour
             saltosRestantes = saltosMaximos; 
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && saltosRestantes > 0)
+        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)) && saltosRestantes > 0)
         {
             saltosRestantes--;
             personaje.velocity = new Vector2(personaje.velocity.x, 0f);
             personaje.AddForce(Vector2.up * fuerzaSalto, ForceMode2D.Impulse);
+            AudioManager.Instance.ReproducirSondo(sonidoSalto);
         }
     }
 

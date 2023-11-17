@@ -173,6 +173,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocidad: 0
+  fuerzaSalto: 0
+  saltosMaximos: 0
+  saltosRestantes: 0
+  capaSuelo:
+    serializedVersion: 2
+    m_Bits: 0
+  sonidoSalto: {fileID: 8300000, guid: 43ea46239d34fb942aa9e662466eead4, type: 3}
 --- !u!95 &9199076478209521166
 Animator:
   serializedVersion: 5
