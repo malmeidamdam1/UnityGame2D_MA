@@ -5,19 +5,24 @@ using TMPro;
 
 public class HUD : MonoBehaviour
 {
-    public GameManager gameManager;
     public TextMeshProUGUI puntos;
-
-   /*
-    void Start()
-    {
-        puntos = GetComponent<TextMeshProUGUI>();
-    }
-   */
+    public GameObject[] vidas; //Asigna en editor
+   
     void Update()
     {
-        puntos.text = gameManager.PuntosTotales.ToString();
+        //puntos.text = GameManager.Instance.PuntosTotales.ToString();
     }
 
+    public void ActualizarPuntos(int puntosTotales) 
+    {
+        puntos.text = puntosTotales.ToString();
+    }
+
+    public void DesactivarVida(int indice) 
+    {
+        vidas[indice].SetActive(false);
+    }
+
+    
 
 }

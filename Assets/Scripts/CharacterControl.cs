@@ -5,43 +5,44 @@ using UnityEngine;
 public class CharacterControl : MonoBehaviour
 {
     private Rigidbody2D personaje;
-    private bool mirandoDrecha;
     private Animator animator;
-
+    private BoxCollider2D boxCollider;
     public float velocidad;
     public float fuerzaSalto;
+    public float fuerzaEnemigo;
     public int saltosMaximos;
     public int saltosRestantes;
+    private bool puedeMoverse = true;
+    private bool mirandoDrecha = true;
 
-    private BoxCollider2D boxCollider;
+
+    private bool enCooldownDash = false;
+    public float tiempoCooldownDash = 0.5f;
+
     public LayerMask capaSuelo;
-    public AudioClip sonidoSalto; //Asignamos en editor a su prefab
+    public AudioClip sonidoSalto; //Asignamos en editor
 
-    // Start is called before the first frame update
     void Start()
     {
         personaje = GetComponent<Rigidbody2D>();
-        velocidad = 5;
-        fuerzaSalto = 10;
-        mirandoDrecha = true;
-        animator = GetComponent<Animator>();
-
         boxCollider = GetComponent<BoxCollider2D>();
         capaSuelo = LayerMask.GetMask("Suelo");
-
+        velocidad = 5;
+        fuerzaSalto = 10;
+        fuerzaEnemigo = 500;
         saltosMaximos = 1;
         saltosRestantes = saltosMaximos;
+        animator = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         ProcesarMovimiento();
-        procesarSalto();
+        ProcesarSalto();
     }
 
     //Evitar doble salto con arrayCast
-    bool estaEnSuelo() 
+    bool EstaEnSuelo() 
     {
        Vector2 cajaComprobacion = new Vector2(boxCollider.bounds.size.x, boxCollider.bounds.size.y);
 
@@ -49,30 +50,43 @@ public class CharacterControl : MonoBehaviour
         return rycastHit.collider != null;
     }
 
-    void procesarSalto() {
+    void ProcesarSalto() {
 
-        if (estaEnSuelo()) 
+        if (EstaEnSuelo()) 
         {
-            saltosRestantes = saltosMaximos; 
+            saltosRestantes = saltosMaximos;
+            animator.SetBool("isJumping", false);
         }
 
         if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow)) && saltosRestantes > 0)
         {
+            animator.SetBool("isJumping", true);
             saltosRestantes--;
             personaje.velocity = new Vector2(personaje.velocity.x, 0f);
             personaje.AddForce(Vector2.up * fuerzaSalto, ForceMode2D.Impulse);
             AudioManager.Instance.ReproducirSondo(sonidoSalto);
+
         }
     }
 
 
     void ProcesarMovimiento() 
     {
+        //Salir si no se puede mover
+        if (puedeMoverse == false) 
+        {
+            return;
+        }
+
+        //Dashear
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            Dash();
+        }
+
         //Devuelve negativo si presiona a izquierda/ Positivo si presiona a derecha / 0 si quieto
         float inputMovimiento = Input.GetAxis("Horizontal");
-
-
-        if (inputMovimiento != 0)
+        if (inputMovimiento != 0f)
         {
             animator.SetBool("isWalking", true);
         }
@@ -80,18 +94,89 @@ public class CharacterControl : MonoBehaviour
         {
             animator.SetBool("isWalking", false);
         }
+
+        //Indicar que no esta saltando
+        if (EstaEnSuelo()) 
+        {
+            animator.SetBool("isJumping", false);
+        }
         personaje.velocity = new Vector2(inputMovimiento * velocidad, personaje.velocity.y);
         GestionarOrientacion(inputMovimiento);
     }
 
     void GestionarOrientacion(float inputMovimiento)
     {
-
         if(mirandoDrecha==true && inputMovimiento < 0 || mirandoDrecha == false && inputMovimiento > 0 )
         {
             mirandoDrecha = !mirandoDrecha;
             transform.localScale = new Vector2(-transform.localScale.x, transform.localScale.y);
         }
+    }
+
+
+    void Dash() 
+    {
+        // Evitar el dash si no se puede mover o tiene cooldown
+        if (!puedeMoverse || enCooldownDash)
+        {
+            return;
+        }
+
+        // Desplazar al personaje hacia adelante
+        float distanciaDash = 0.5f; // Ajusta la distancia según tus necesidades
+        Vector2 nuevaPosicion = transform.position + (mirandoDrecha ? Vector3.right : Vector3.left) * distanciaDash;
+        personaje.MovePosition(nuevaPosicion);
+
+        animator.SetBool("isDashing", true);
+
+        StartCoroutine(ResetearDash());
+    }
+
+    IEnumerator ResetearDash()
+    {
+        //Dejamos que haga la animacion antes de detener
+        yield return new WaitForSeconds(1); 
+
+        // Detener el dash y activar el cooldown
+        animator.SetBool("isDashing", false);
+        enCooldownDash = true;
+
+
+        // Esperar el tiempo de cooldown antes de poder dashear nuevamente y reiniciamos poder hacer dash
+        yield return new WaitForSeconds(tiempoCooldownDash);
+        enCooldownDash = false;
+    }
+
+
+
+    public void RecibirGolpe() 
+    {
+        puedeMoverse = false;
+
+        Vector2 direccionGolpe;
+
+        if (personaje.velocity.x > 0)
+        {
+            direccionGolpe = new Vector2(-1, 1);
+        }
+        else 
+        {
+            direccionGolpe = new Vector2(1, 1);
+        }
+        personaje.AddForce(direccionGolpe * fuerzaEnemigo);
+        StartCoroutine(EsperarYMover());
+    }
+
+    IEnumerator EsperarYMover()
+    {
+        //esperar antes de comprobar
+        yield return new WaitForSeconds(0.1f);
+
+        while (!EstaEnSuelo()) 
+        {
+            yield return null;
+        }
+        puedeMoverse = true;
     }
 
 }
