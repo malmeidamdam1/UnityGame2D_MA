@@ -7,20 +7,20 @@ public class CharacterControl : MonoBehaviour
     private Rigidbody2D personaje;
     private Animator animator;
     private BoxCollider2D boxCollider;
-    public float velocidad;
-    public float fuerzaSalto;
-    public float fuerzaEnemigo;
-    public int saltosMaximos;
-    public int saltosRestantes;
+    private float velocidad;
+    private float fuerzaSalto;
+    private float fuerzaEnemigo;
+    private int saltosMaximos;
+    private int saltosRestantes;
     private bool puedeMoverse = true;
     private bool mirandoDrecha = true;
 
-
     private bool enCooldownDash = false;
-    public float tiempoCooldownDash = 0.5f;
+    private float tiempoCooldownDash = 0.5f;
 
-    public LayerMask capaSuelo;
+    private LayerMask capaSuelo;
     public AudioClip sonidoSalto; //Asignamos en editor
+    public AudioClip sonidoGolpe; //Asignamos en editor
 
     void Start()
     {
@@ -164,8 +164,31 @@ public class CharacterControl : MonoBehaviour
             direccionGolpe = new Vector2(1, 1);
         }
         personaje.AddForce(direccionGolpe * fuerzaEnemigo);
+        AudioManager.Instance.ReproducirSondo(sonidoGolpe);
         StartCoroutine(EsperarYMover());
     }
+
+    public void Quemarse()
+    {
+        puedeMoverse = false;
+
+        Vector2 direccionAtras;
+
+        if (personaje.velocity.x > 0)
+        {
+            direccionAtras = new Vector2(-1, 1);
+        }
+        else
+        {
+            direccionAtras = new Vector2(1, 1);
+        }
+
+        float distanciaAtras = 100;
+        personaje.AddForce(direccionAtras * distanciaAtras);
+        AudioManager.Instance.ReproducirSondo(sonidoGolpe);
+        StartCoroutine(EsperarYMover());
+    }
+
 
     IEnumerator EsperarYMover()
     {

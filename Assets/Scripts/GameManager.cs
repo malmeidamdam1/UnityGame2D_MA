@@ -17,6 +17,12 @@ public class GameManager : MonoBehaviour
 
     private int vidas = 3;
 
+    private Animator playerAnimator;  
+
+    public AudioClip sonidoMorir; //Asignamos en editor
+
+
+
     public void Awake() {
         if (Instance == null)
         {
@@ -26,6 +32,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Más de 1 gameManager en escena");
         }
+        playerAnimator = GameObject.FindGameObjectWithTag("Player").GetComponent<Animator>();
     }
 
 
@@ -40,10 +47,27 @@ public class GameManager : MonoBehaviour
         vidas --;
         hud.DesactivarVida(vidas);
 
-        if (vidas == 0) 
+        if (vidas == 0) //Muere que vaya al gameOver
         {
-            SceneManager.LoadScene(0);
+            Morir();
         }
     }
- 
+
+    //Lo hago publico para matarlo directamente desde finMapa.cs
+    public void Morir() 
+    {
+        {
+            playerAnimator.SetTrigger("irMorir");
+            AudioManager.Instance.ReproducirSondo(sonidoMorir);
+        }
+        StartCoroutine(EsperarYMostrarGameOver());
+    }
+
+    IEnumerator EsperarYMostrarGameOver()
+    {
+        yield return new WaitForSeconds(1.3f);
+        SceneManager.LoadScene(2);
+    }
+
+
 }

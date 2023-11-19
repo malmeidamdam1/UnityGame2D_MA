@@ -8,11 +8,6 @@ public class HUD : MonoBehaviour
     public TextMeshProUGUI puntos;
     public GameObject[] vidas; //Asigna en editor
    
-    void Update()
-    {
-        //puntos.text = GameManager.Instance.PuntosTotales.ToString();
-    }
-
     public void ActualizarPuntos(int puntosTotales) 
     {
         puntos.text = puntosTotales.ToString();
@@ -20,9 +15,9 @@ public class HUD : MonoBehaviour
 
     public void DesactivarVida(int indice) 
     {
-        vidas[indice].SetActive(false);
-    }
-
-    
-
+        if (indice <= 2)
+        {
+            vidas[indice].SetActive(false);
+        }
+    }  
 }

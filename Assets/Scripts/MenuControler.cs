@@ -7,11 +7,13 @@ public class MenuControler : MonoBehaviour
 {
     public void Jugar() //Asigna en editor desde button list
     {
+        //Carga Escena
         SceneManager.LoadScene(1);
     }
     public void Salir() 
     {
-        Debug.Log("Gracias por jugar");
+        //Cierra 
+        Debug.Log("Gracias por jugar");//Mensaje solo para ver que si esta ejecutandose esto
         Application.Quit();
     }
 }
