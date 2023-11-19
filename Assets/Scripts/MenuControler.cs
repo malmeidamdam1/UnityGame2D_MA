@@ -16,4 +16,5 @@ public class MenuControler : MonoBehaviour
         Debug.Log("Gracias por jugar");//Mensaje solo para ver que si esta ejecutandose esto
         Application.Quit();
     }
+
 }
